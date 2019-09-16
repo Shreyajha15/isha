@@ -1,0 +1,269 @@
+---
+title: "01 - In class activity"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = TRUE,
+	warning = TRUE
+)
+```
+
+
+1.	Import Top20cars into RStudio.
+```{r}
+
+```
+
+2.	Get the name of all the columns. 
+```{r}
+
+```
+3.	Create a new column “Percent change in sales from 2010”.
+```{r}
+
+```
+4.	Again show the name of all the columns. What has changed? 
+
+```{r}
+
+```
+
+5.	Show the head and tail of this data frame.
+
+```{r}
+
+```
+
+6.	Show all the rows that "Manufacturer" is "Ford". 
+
+```{r}
+
+```
+
+7.	Sort Top20Cars according to column "Sales (March 2010)". 
+
+```{r}
+
+```
+
+8.	Sort Top20Cars according to column "Sales (March 2010)", show only the first two columns. 
+
+```{r}
+
+```
+
+9.	What was the best-selling automobile in March 2011?
+
+```{r}
+
+```
+
+10.	What was the best-selling automobile in March 2010? 
+
+```{r}
+
+```
+
+11.	Show all sales of models made by Toyota. 
+
+```{r}
+
+```
+
+12.	Show all automobiles with declining sales from March 2010. 
+
+```{r}
+
+```
+
+13.  Import softdrinks into RStudio. Make a one column data frame out of this dataset. 
+
+```{r}
+softdrinks <- read.csv("softdrinks.csv")
+df <- cbind(softdrinks$Sample.Data)
+df <- cbind(df, softdrinks$X)
+df
+# dim(df)
+# df
+```
+
+14.	Develop a frequency distribution for these data. 
+
+```{r}
+
+```
+
+15.	Develop a percent frequency distribution for these data. 
+
+```{r}
+
+```
+
+16.	Now, we are going to create a frequency distribution of quantitative data. For this part import auditdata into R and convert it into a one column dataframe. 
+
+```{r}
+auditdata <- read.csv("auditdata.csv")
+auditdata
+
+df <- as.matrix(auditdata)
+df
+df <- as.vector(df)
+df
+```
+
+17.	Find the minimum and maximum values in this dataframe. 
+
+```{r}
+
+```
+
+18.	Create 5 bins between 10 and 35. The classes are defined by creating a list of class boundaries.
+
+```{r}
+bins <- seq(10, 35, by =5)
+bins
+```
+
+19.	Now organizes the data into the appropriate bins. 
+
+```{r}
+audit <- cut(df, bins)
+audit
+```
+
+20.	Use the transform function to put the table into column format.
+
+```{r}
+transform(table(audit))
+
+```
+21.	Create the histogram using the hist command.
+
+```{r}
+hist(df, breaks = bins, xlab = "Audit", col="black")
+```
+
+22.	Create a cumulative frequency of this dataset. 
+
+```{r}
+df <- cumsum(table(audit))
+df
+```
+
+23.	Create a cumulative plot of this dataset. 
+
+```{r}
+plot(df, xlab="Audit", ylab = "Accumulative Sum", type = "l")
+```
+#### Sampling from the dataset
+
+24. Import WestRoxbury data as housing dataframe. 
+```{r}
+housing <- read.csv("WestRoxbury.csv")
+housing
+```
+25. Show the first ten row of this dataset. 
+```{r}
+head(housing, 10)
+```
+26. Find the dimension of data frame. 
+```{r}
+dim(housing)
+```
+27. Show the first 10 rows of the first column only. 
+```{r}
+head(housing[, 1], 10)
+```
+28. Show the fifth row of the first 10 columns. 
+```{r}
+housing[5, 1:10]
+```
+29. Show columns 1, 2, 4, 8, 9, and 10 of the fifth row. 
+```{r}
+housing[5, c(1,2,4,8,9,10)]
+```
+30. Find the mean of the first column.
+```{r}
+mean(housing[, 1])
+```
+31. Find summary statistics for each column. 
+```{r}
+summary(housing)
+```
+32. Find random sample of 5 observations. 
+```{r}
+sample_rows <- sample(row.names(housing), 5)
+housing[sample_rows, ]
+```
+33. Oversample houses with over 10 rooms. 
+```{r}
+(length(housing[housing$ROOMS >= 10, 1]))/length(housing$TOTAL.VALUE)
+
+sample_rows = sample(row.names(housing), 5, prob = ifelse(housing$ROOMS >= 10, 0.9, 0.1))
+
+housing[sample_rows, ]
+```
+34. Print the list of columns in a useful column format. 
+```{r}
+colnames(housing)
+```
+35. Change the name of the first column to TOTAL_VALUE. 
+```{r}
+colnames(housing)[1] <- c("TOTAL_VALUE")
+names(housing)
+```
+36. Find the class of column Remodel. 
+```{r}
+class(housing$TOTAL_VALUE)
+class(housing$REMODEL)
+```
+37. Find levels of column remodel. 
+```{r}
+
+```
+38. Find the class of column bedroom.
+```{r}
+
+```
+39. Find the class of column TOTAL_VALUE. 
+```{r}
+
+```
+40. Use model.matrix() to convert all categorical variables in the data frame into a set of dummy variables. Then turn the resulting data matrix back into a data frame and add it to the housing data frame. Finally drop the Remodel column fromhousing dataset. 
+```{r}
+remodel_df <- as.data.frame(model.matrix( ~ 0 + REMODEL, data = housing))
+new_df <- cbind(housing, remodel_df)
+keep <- names(new_df)
+keep <- keep[-(14)]
+new_df <- subset(new_df, select = keep)
+names(new_df)
+```
+41.  To illustrate missing data procedures, first convert a few random entries for bedrooms to NA's. Then we impute these missing values using the median of the remaining values. 
+```{r}
+random_samples = sample(row.names(new_df), 10)
+random_samples
+new_df[random_samples, ]$BEDROOMS = NA
+message()
+message("------------ After NA -------------")
+summary(new_df)
+message("-------- END of Summary ----------")
+message()
+
+new_df[random_samples, ]$BEDROOMS = median(new_df$BEDROOMS, na.rm = TRUE)
+message()
+message("------------ After Replacing NA -------------")
+summary(new_df)
+message("-------- END of Summary ----------")
+message()
+```
+42. Scale all the columns in housing data frame. Save the new data frame as housing_normalized.
+```{r}
+housing_normalized <- scale(new_df)
+housing_normalized
+```
+
