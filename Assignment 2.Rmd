@@ -1,0 +1,91 @@
+---
+title: "Assignment 2"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+For this Assignment, you will use the attached dataset. The goal of this assignment is to practice visualization tools in R. 
+
+
+```{r}
+
+library(ggplot2)
+library(plyr)
+library(foreach)
+
+```
+
+1. Load the data as a data frame. (1 point)
+```{r}
+
+data <- read.csv("Top50Movies.csv")
+
+sub_data  = data[,c(3,4,5,8,9,10)]
+
+transormData = function(col_data){
+  col_data = as.array(col_data)
+  new_col_data = aaply(.data = col_data, .margins = c(1), .fun = function(value){
+    value = gsub("[,]","", value )
+    value = gsub("[--]",NA, value )
+    value = as.numeric(value)
+  })
+}
+
+budgetInfAdj = transormData(col_data = sub_data$Budget..Inflation.Adjusted.Millions...)
+worldInfAdj = transormData(col_data = sub_data$World.Box.Office.Receipts..Inflation.Adjusted.Millions...)
+usInfAdj = transormData(col_data = sub_data$U.S..Box.Office.Receipts..Inflation.Adjusted.Millions...)
+budgetNonInfAdj = transormData(col_data = sub_data$Budget..Non.Inflation.Adjusted.Millions...)
+worldNonInfAdj = transormData(col_data = sub_data$World.Box.Office.Receipts..Non.Inflation.Adjusted.Millions...)
+usNonInfAdj = transormData(col_data = sub_data$U.S..Box.Office.Receipts..Non.Inflation.Adjusted.Millions...)
+
+keep <- names(data)
+keep <- keep[-c(3,4,5,8,9,10)]
+new_data <- subset(data, select = keep)
+new_data = cbind(new_data, budgetInfAdj, worldInfAdj, usInfAdj, budgetNonInfAdj, worldNonInfAdj, usNonInfAdj)
+new_data
+```
+
+2. Explore the relationship between the year released and inflation-adjusted U.S. box office receipts. Which plotting tool should you use for this purpose? Explain your findings. (2 points)
+
+```{r}
+ggplot(data = data, mapping = aes(x = Year.Released, y = usInfAdj)) +
+  geom_line(na.rm = TRUE) +
+  labs(title="Line Graph", x="Year Released", y="U.S. Box Office Receipts (Inflation Adjusted) ")
+
+```
+
+3. Explore the relationship between noninflation-adjusted budget and noninflation-adjusted world box office receipts. Explain your findings. (2 points)
+```{r}
+ggplot(data = data, mapping = aes(x = budgetNonInfAdj, y = worldNonInfAdj)) +
+  geom_line(na.rm = TRUE) +
+  labs(title="Line Graph", x="Non-Inflation Adjusted Budget", y="Non-Inflation Adjusted World Box Office Receipts")
+```
+
+4. Explore the relationship between inflation-adjusted budget and inflation-adjusted world box office receipts. Explain your findings. (2 points)
+```{r}
+ggplot(data = data, mapping = aes(x = budgetInfAdj, y = worldInfAdj)) +
+  geom_line(na.rm = TRUE) +
+  labs(title="Line Graph", x="Inflation Adjusted Budget", y="Inflation Adjusted World Box Office Receipts")
+```
+5. Use a proper plotting tool to how the distribution of inflation-adjusted U.S. box office receipts. (2 points)
+```{r}
+ggplot(data = data, mapping = aes(x = usInfAdj)) +
+  geom_histogram(na.rm = TRUE, binwidth = 20) +
+  labs(title="Line Graph", x="Inflation Adjusted U.S. Box Office Receipts")
+
+```
+6. Compare U.S. Box Office Receipts from each decade. Which plotting tool can be used here? Explain your findings. ( 2 points)
+```{r}
+
+```
+7. Show the temporal pattern of U.S. Box Office Receipts. Which plotting tool can be used here. Explain your findings. (2 points)
+```{r}
+
+```
+8. Explore the data yourself. Share an interesting finding that has not been explored above. (2 points)
+```{r}
+
+```
