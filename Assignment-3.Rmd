@@ -1,0 +1,131 @@
+---
+title: "Assignment-3"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+library(ggplot2)
+
+df = read.csv('FBS.csv')
+head(df, 5)
+
+# Check if any missing values exist in any columns
+if(any(is.na(df[, "StadiumCapacity"]))){
+  # Handle Missing Values in StadiumCapacity
+  message("StadiumCapacity has missing values")
+}
+
+# Check if any missing values exist in any columns
+if(any(is.na(df[, "Latitude"]))){
+  # Handle Missing Values in StadiumCapacity
+  #df$Latitude
+  message("Latitude has missing values")
+}
+
+# Check if any missing values exist in any columns
+if(any(is.na(df[, "Longitude"]))){
+  # Handle Missing Values in StadiumCapacity
+  message("Longitude has missing values")
+
+}
+
+# Check if any missing values exist in any columns
+if(any(is.na(df[, "AthleticRevenue...."]))){
+  # Handle Missing Values in StadiumCapacity
+  message("AthleticRevenue.... has missing values")
+  ggplot(data = df, mapping = aes(x = AthleticRevenue....)) +
+  geom_histogram(na.rm = TRUE, binwidth = 5.0e+07)
+  
+  medianVal = median(df$AthleticRevenue...., na.rm = TRUE)
+  df$AthleticRevenue....[is.na(df$AthleticRevenue....)] = medianVal
+  
+  message("Any there any more NA values: ", any(is.na(df)))
+}
+
+# Check if any missing values exist in any columns
+if(any(is.na(df[, "Endowment...000."]))){
+  # Handle Missing Values in StadiumCapacity
+  #df$Endowment...000.
+  message("Endowment...000. has missing values")
+
+}
+
+# Check if any missing values exist in any columns
+if(any(is.na(df[, "Enrollment"]))){
+  # Handle Missing Values in StadiumCapacity
+  #df$Enrollment
+  message("Enrollment has missing values")
+}
+
+```
+Remove the non-numeric Column
+```{r}
+colNames = colnames(df)[-(1)]
+df_num = subset.data.frame(x = df, select = colNames, drop = FALSE)
+colnames(df_num)
+```
+
+Clustering
+```{r}
+# Normalize the data
+df.norm <- data.frame(sapply(X = df_num, FUN = scale))
+head(df.norm)
+
+```
+Find Outliers
+```{r}
+
+```
+
+Clustering
+```{r}
+# Since we do not know how many clusters can we make out of the data, we prefer to use hierarchical clustring over k-means clustering
+
+clusters <- hclust(dist(df.norm), method = "ward.D")
+plot(clusters)
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
