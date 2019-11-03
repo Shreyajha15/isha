@@ -13,18 +13,6 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 ```{r}
@@ -84,12 +72,167 @@ if(any(is.na(df[, "Enrollment"]))){
 ```
 Remove the non-numeric Column
 ```{r}
-colNames = colnames(df)[-(1)]
+# Since grouping by school name and enrollment number are not relevant as they are mere names/ ids, removing them
+
+# Remove the school Column and enrollment column. That means, cluster based-on StadiumCapacity, Latitude, Logitude, AthleticRevenue and Endowment columns.
+
+colNames = colnames(df)[c(-1,-7)]
 df_num = subset.data.frame(x = df, select = colNames, drop = FALSE)
 colnames(df_num)
+
+```
+Data exploring through graphs
+```{r}
+
+ggplot(data = df_num, mapping = aes(x = Longitude, y = Latitude, col = StadiumCapacity)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm")
+
+# Observations from graph:
+# All the data except one is concentrated between Longitude(-125, -70) and latitude(25, 50) - One entry is located at Logitude -155 & latitude 19
+
 ```
 
-Clustering
+```{r}
+
+ggplot(data = df_num, mapping = aes(x = StadiumCapacity, y = AthleticRevenue....)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm")
+
+# Observations from graph:
+# Stadium Capacity and Athletic Revenue have positive linear relationship
+
+```
+
+```{r}
+
+ggplot(data = df_num, mapping = aes(x = StadiumCapacity, y = AthleticRevenue....)) + 
+  geom_boxplot(outlier.colour = "red", outlier.shape = 16,
+             outlier.size = 2, notch = FALSE)
+```
+```{r}
+
+ggplot(data = df_num, mapping = aes(x = StadiumCapacity)) +
+  geom_histogram(stat = "bin", bins = 40)
+
+# Observations from graph:
+# StadiumCapacity data distribution is Multi-Modal and Right-Skewed
+
+```
+
+```{r}
+
+ggplot(data = df_num, mapping = aes(x = AthleticRevenue....)) +
+  geom_histogram(stat = "bin", bins = 40)
+
+# Observations from graph:
+# AthleticRevenue.... data distribution is Multi-Modal and Right-Skewed
+
+```
+
+```{r}
+
+ggplot(data = df_num, mapping = aes(x = Endowment...000.)) +
+  geom_histogram(stat = "bin", bins = 40)
+
+# Observations from graph:
+# Endowment...000. data distribution is Right-Skewed
+
+```
+
+Hierarchical Clustering using Ward method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+# Depending on the information we got from data exploration, it is best to use ward/ average/ centroid linkages to compute the clusters. Of all these, ward method ensures that loss of information is least after clustering. Hence choosing ward method.
+
+hClusters <- hclust(dist(df_num), method = "ward.D2")
+plot(hClusters)
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 4)
+plot(groups)
+
+```
+Hierarchical Clustering using Average method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(dist(df_num), method = "average")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 4)
+plot(groups)
+
+# The clusters from average method are nearly similar to the clusters from ward but cluster-3 is much sparse compared to the cluster-3 from ward method. In other words, ward method performed better in this case. 
+
+```
+Hierarchical Clustering using Centroid method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(dist(df_num), method = "centroid")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 2)
+plot(groups)
+
+# The clusters from centroid method produced 1 overly-dense cluster and 1 sparse cluster, which is not a good clustering solution for this case.
+
+# Instead of 2 clusters, if we cut the tree at 4, then there are 2 dense clusters and 2 sparse clusters where cluster-4 has just one record which is again not an acceptable clustering solution.
+
+```
+Hierarchical Clustering using single method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(dist(df_num), method = "single")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 2)
+plot(groups)
+
+# The clusters from single method produced 1 overly-dense cluster and 1 sparse cluster which just has one record, which is again not a good clustering solution for this case.
+
+```
+Hierarchical Clustering using complete method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(dist(df_num), method = "complete")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 4)
+plot(groups)
+
+# The clusters from complete method produced 3 dense clusters and 1 sparse cluster,
+
+```
+
+Normalize Data
 ```{r}
 # Normalize the data
 df.norm <- data.frame(sapply(X = df_num, FUN = scale))
@@ -98,18 +241,20 @@ head(df.norm)
 ```
 Find Outliers
 ```{r}
-
 ```
 
 Clustering
 ```{r}
-# Since we do not know how many clusters can we make out of the data, we prefer to use hierarchical clustring over k-means clustering
 
-clusters <- hclust(dist(df.norm), method = "ward.D")
-plot(clusters)
+hClusters_norm <- hclust(dist(df.norm), method = "ward.D")
+plot(hClusters_norm)
 ```
 
 ```{r}
+
+groups_norm <- cutree(hClusters, k = 5)
+plot(groups_norm)
+
 ```
 
 ```{r}
