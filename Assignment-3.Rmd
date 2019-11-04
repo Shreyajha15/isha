@@ -115,12 +115,6 @@ ggplot(data = df_num, mapping = aes(x = StadiumCapacity, y = AthleticRevenue....
 
 ```{r}
 
-ggplot(data = df_num, mapping = aes(x = StadiumCapacity, y = AthleticRevenue....)) + 
-  geom_boxplot(outlier.colour = "red", outlier.shape = 16,
-             outlier.size = 2, notch = FALSE)
-```
-```{r}
-
 ggplot(data = df_num, mapping = aes(x = StadiumCapacity)) +
   geom_histogram(stat = "bin", bins = 40)
 
@@ -319,7 +313,6 @@ df.norm <- data.frame(sapply(X = df_num, FUN = scale))
 head(df.norm)
 
 distance  = dist(df.norm, method = 'euclidean')
-distance
   
 ```
 
