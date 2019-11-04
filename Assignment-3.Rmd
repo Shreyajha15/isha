@@ -168,7 +168,11 @@ groups <- cutree(hClusters, k = 4)
 plot(groups)
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # dunn's index: 0.058301
 
@@ -190,9 +194,13 @@ plot(groups)
 
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
 
 # Dunn's Index : 0.07087089, higher than Ward method's Dunn's Index with total 4 clusters - 3 dense clusters and 1 sparse cluster, hence Average method clustering better.
+
 ```
 Hierarchical Clustering using Centroid method
 ```{r}
@@ -210,7 +218,11 @@ groups <- cutree(hClusters, k = 2)
 plot(groups)
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.08737614, higher than average method's Dunn's Index with total 2 clusters - 1 overly dense cluster and 1 sparse cluster.
 
@@ -234,7 +246,11 @@ plot(groups)
 
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.1479173, higher than centroid method's Dunn's Index with almost 1 cluster with all the records, hence so far average  method is clustering better
 
@@ -256,7 +272,11 @@ plot(groups)
 
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.0280108, less than all the previous methods. So far, average method is found to be doing better clustering
 
@@ -277,7 +297,11 @@ CUTREE into 4 groups
 groups <- cutree(hClusters, k = 4)
 plot(groups)
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.02527797, less than the previous methods. So far, average method is found to be doing better clustering
 
@@ -298,7 +322,11 @@ CUTREE into 4 groups
 groups <- cutree(hClusters, k = 4)
 plot(groups)
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.02527797, less than the previous methods. 
 
@@ -335,7 +363,11 @@ groups <- cutree(hClusters, k = 4)
 plot(groups)
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.1324915
 
@@ -357,7 +389,11 @@ plot(groups)
 
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.3447668, higher than Ward method's Dunn's Index with total 5 clusters - 1 overly-dense cluster and 4 single record clusters - which is not a good clustering.
 
@@ -379,7 +415,11 @@ groups <- cutree(hClusters, k = 6)
 plot(groups)
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.2342759, higher than Ward method's Dunn's Index with total 6 clusters - 1 overly-dense cluster and 5 single record clusters - which is not a good clustering.
 
@@ -403,7 +443,11 @@ plot(groups)
 
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.3447668, higher than Ward method's Dunn's Index with total 5 clusters - 1 overly-dense cluster and 4 single record clusters - which is not a good clustering.
 
@@ -427,7 +471,11 @@ plot(groups)
 
 
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.1519032, higher than Ward method's Dunn's Index with total 5 clusters - 1 overly-dense cluster, 2 relatively-very-sparse clusters and 2 single record clusters - which is not a good clustering.
 
@@ -450,7 +498,11 @@ CUTREE into 4 groups
 groups <- cutree(hClusters, k = 6)
 plot(groups)
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.1060077, less than Ward method's Dunn's Index with total 6 clusters - 1 overly-dense cluster and 5 single record clusters - which is not a good clustering.
 
@@ -473,11 +525,23 @@ CUTREE into 4 groups
 groups <- cutree(hClusters, k = 7)
 plot(groups)
 clusterQuality  = dunn( distance, groups, method = "euclidean")
-clusterQuality
+
+
+# No of records in each cluster
+table(groups)
+
 
 # Dunn's Index : 0.1570507, higher than Ward method's Dunn's Index with total 7 clusters - 1 overly-dense cluster, 2 sparse relatively clusters and 4 single record clusters - which is not a good clustering.
 
 # Hence Ward method clustering better.
+
+# Comparing the difference between clusters from normalized data vs non-normalized:
+
+# Dunn's Index is improved
+
+# Density of the clusters is relatively distributed and dispersion is relatively less
+
+# The main reason for this difference is due to the fact that all the different types of measurements are brought to one scale when the data is normalized. This removed the effect of large numbers while distance calculation in normalized data.
 
 ```
 [PART-2] Remove the non-numeric Column
@@ -518,11 +582,14 @@ clusterQuality  = dunn( distance, kClusters$cluster, method = "euclidean")
 
 clusterQuality
 
-#dunn's index: 0.03039224
+# No of records in each cluster
+table(kClusters$cluster)
+
+#dunn's index: 0.09507319
 
 
-# Cluster-7 is the largest
-# Cluster-3 is the smallest
+# Cluster-1, 10 are the largest
+# Cluster-6 is the smallest
 # The dispersion/ distance in the data made the least dense cluster diverse
 
 ```
@@ -556,13 +623,19 @@ clusterQuality  = dunn( distance, kClusters$cluster, method = "euclidean")
 
 clusterQuality
 
-# dunn's index: 0.1195883
+# No of records in each cluster
+table(kClusters$cluster)
 
-# Cluster-10 is the largest
-# Cluster-5 is the smallest
+# dunn's index: 0.1196583
+
+# Cluster-3 is the largest
+# Cluster-4 is the smallest
 
 # Comparing the clusters between non-normalized data and normalized data, we can see that the density of clusters is relatively distributed among more clusters in non-normalized data instead of concentrating in just few clusters in normalized data.
+
 # Dunn's Index is high incase of normalized data compared to non-normalized data
+
+# The main reason for this difference is due to the fact that all the different types of measurements are brought to one scale when the data is normalized. This removed the effect of large numbers while distance calculation in normalized data.
 
 
 ```
