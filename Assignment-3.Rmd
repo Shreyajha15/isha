@@ -17,6 +17,9 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 
 ```{r}
 library(ggplot2)
+library(clValid)
+library(cluster)
+#library(fpc)
 
 df = read.csv('FBS.csv')
 head(df, 5)
@@ -72,15 +75,21 @@ if(any(is.na(df[, "Enrollment"]))){
 ```
 Remove the non-numeric Column
 ```{r}
-# Since grouping by school name and enrollment number are not relevant as they are mere names/ ids, removing them
+# Since grouping by school nameis not relevant removing it
 
-# Remove the school Column and enrollment column. That means, cluster based-on StadiumCapacity, Latitude, Logitude, AthleticRevenue and Endowment columns.
+# Remove the school Column. That means, cluster based-on StadiumCapacity, Latitude, Logitude, AthleticRevenue, Endowment and enrollment columns.
 
-colNames = colnames(df)[c(-1,-7)]
+colNames = colnames(df)[c(-1)]
 df_num = subset.data.frame(x = df, select = colNames, drop = FALSE)
 colnames(df_num)
 
 ```
+```{r}
+
+distance = dist(df_num, method="euclidean")
+
+```
+
 Data exploring through graphs
 ```{r}
 
@@ -140,14 +149,22 @@ ggplot(data = df_num, mapping = aes(x = Endowment...000.)) +
 
 ```
 
+Without Normalization
+
 Hierarchical Clustering using Ward method
 ```{r}
 
 # Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
 
-# Depending on the information we got from data exploration, it is best to use ward/ average/ centroid linkages to compute the clusters. Of all these, ward method ensures that loss of information is least after clustering. Hence choosing ward method.
+# Depending on the information we got from data exploration, initial thoughts is that it is best to use ward/ average/ centroid/ complete linkages to compute the clusters. Of all these, ward method ensures that similar records are clustered such that loss of information after clustering is relatively least.
 
-hClusters <- hclust(dist(df_num), method = "ward.D2")
+# To validate the cluster quality, dunn's index can be computed which suggests the dissimilarity between clusters.
+
+# Dunn's index validates based on: small variance between members of the cluster, and well separated clusters, where the means of different clusters are sufficiently far apart, as compared to the within cluster variance.
+
+# Higher the dunn's index, better the clustering
+
+hClusters <- hclust(distance, method = "ward.D2")
 plot(hClusters)
 ```
 CUTREE into 4 groups
@@ -155,6 +172,11 @@ CUTREE into 4 groups
 
 groups <- cutree(hClusters, k = 4)
 plot(groups)
+
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# dunn's index: 0.058301
 
 ```
 Hierarchical Clustering using Average method
@@ -162,7 +184,7 @@ Hierarchical Clustering using Average method
 
 # Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
 
-hClusters <- hclust(dist(df_num), method = "average")
+hClusters <- hclust(distance, method = "average")
 plot(hClusters)
 
 ```
@@ -172,15 +194,18 @@ CUTREE into 4 groups
 groups <- cutree(hClusters, k = 4)
 plot(groups)
 
-# The clusters from average method are nearly similar to the clusters from ward but cluster-3 is much sparse compared to the cluster-3 from ward method. In other words, ward method performed better in this case. 
 
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.07087089, higher than Ward method's Dunn's Index with total 4 clusters - 3 dense clusters and 1 sparse cluster, hence Average method clustering better.
 ```
 Hierarchical Clustering using Centroid method
 ```{r}
 
 # Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
 
-hClusters <- hclust(dist(df_num), method = "centroid")
+hClusters <- hclust(distance, method = "centroid")
 plot(hClusters)
 
 ```
@@ -190,9 +215,12 @@ CUTREE into 4 groups
 groups <- cutree(hClusters, k = 2)
 plot(groups)
 
-# The clusters from centroid method produced 1 overly-dense cluster and 1 sparse cluster, which is not a good clustering solution for this case.
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
 
-# Instead of 2 clusters, if we cut the tree at 4, then there are 2 dense clusters and 2 sparse clusters where cluster-4 has just one record which is again not an acceptable clustering solution.
+# Dunn's Index : 0.08737614, higher than average method's Dunn's Index with total 2 clusters - 1 overly dense cluster and 1 sparse cluster.
+
+# Hence average method is better so far.
 
 ```
 Hierarchical Clustering using single method
@@ -200,7 +228,7 @@ Hierarchical Clustering using single method
 
 # Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
 
-hClusters <- hclust(dist(df_num), method = "single")
+hClusters <- hclust(distance, method = "single")
 plot(hClusters)
 
 ```
@@ -210,7 +238,11 @@ CUTREE into 4 groups
 groups <- cutree(hClusters, k = 2)
 plot(groups)
 
-# The clusters from single method produced 1 overly-dense cluster and 1 sparse cluster which just has one record, which is again not a good clustering solution for this case.
+
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.1479173, higher than centroid method's Dunn's Index with almost 1 cluster with all the records, hence so far average  method is clustering better
 
 ```
 Hierarchical Clustering using complete method
@@ -218,7 +250,7 @@ Hierarchical Clustering using complete method
 
 # Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
 
-hClusters <- hclust(dist(df_num), method = "complete")
+hClusters <- hclust(distance, method = "complete")
 plot(hClusters)
 
 ```
@@ -228,7 +260,55 @@ CUTREE into 4 groups
 groups <- cutree(hClusters, k = 4)
 plot(groups)
 
-# The clusters from complete method produced 3 dense clusters and 1 sparse cluster,
+
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.0280108, less than all the previous methods. So far, average method is found to be doing better clustering
+
+```
+
+Hierarchical Clustering using complete method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(distance, method = "median")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 4)
+plot(groups)
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.02527797, less than the previous methods. So far, average method is found to be doing better clustering
+
+```
+
+Hierarchical Clustering using mcquitty method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(distance, method = "mcquitty")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 4)
+plot(groups)
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.02527797, less than the previous methods. 
+
+# Hence, average method is producing best clusters compared to all the others
 
 ```
 
@@ -238,32 +318,248 @@ Normalize Data
 df.norm <- data.frame(sapply(X = df_num, FUN = scale))
 head(df.norm)
 
-```
-Find Outliers
-```{r}
-```
-
-Clustering
-```{r}
-
-hClusters_norm <- hclust(dist(df.norm), method = "ward.D")
-plot(hClusters_norm)
+distance  = dist(df.norm, method = 'euclidean')
+distance
+  
 ```
 
+With Normalization
+
+Hierarchical Clustering using Ward method
 ```{r}
 
-groups_norm <- cutree(hClusters, k = 5)
-plot(groups_norm)
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+# Depending on the information we got from data exploration, initial thoughts is that it is best to use ward/ average/ centroid/ complete linkages to compute the clusters. Of all these, ward method ensures that loss of information is least after clustering. Hence choosing ward method.
+
+hClusters <- hclust(distance, method = "ward.D2")
+plot(hClusters)
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 4)
+plot(groups)
+
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.1324915
+
+```
+Hierarchical Clustering using Average method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(distance, method = "average")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 5)
+plot(groups)
+
+
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.3447668, higher than Ward method's Dunn's Index with total 5 clusters - 1 overly-dense cluster and 4 single record clusters - which is not a good clustering.
+
+# Hence Ward method clustering better.
+```
+Hierarchical Clustering using Centroid method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(distance, method = "centroid")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 6)
+plot(groups)
+
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.2342759, higher than Ward method's Dunn's Index with total 6 clusters - 1 overly-dense cluster and 5 single record clusters - which is not a good clustering.
+
+# Hence Ward method clustering better.
+
+```
+Hierarchical Clustering using single method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(distance, method = "single")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 5)
+plot(groups)
+
+
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.3447668, higher than Ward method's Dunn's Index with total 5 clusters - 1 overly-dense cluster and 4 single record clusters - which is not a good clustering.
+
+# Hence Ward method clustering better.
+
+```
+Hierarchical Clustering using complete method
+```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(distance, method = "complete")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 5)
+plot(groups)
+
+
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.1519032, higher than Ward method's Dunn's Index with total 5 clusters - 1 overly-dense cluster, 2 relatively-very-sparse clusters and 2 single record clusters - which is not a good clustering.
+
+# Hence Ward method clustering better.
 
 ```
 
+Hierarchical Clustering using complete method
 ```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(distance, method = "median")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 6)
+plot(groups)
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.1060077, less than Ward method's Dunn's Index with total 6 clusters - 1 overly-dense cluster and 5 single record clusters - which is not a good clustering.
+
+# Hence Ward method clustering better.
+
 ```
 
+Hierarchical Clustering using mcquitty method
 ```{r}
+
+# Since we do not have any informed know how many clusters we need-to build, we prefer to use hierarchical clustring over k-means clustering
+
+hClusters <- hclust(distance, method = "mcquitty")
+plot(hClusters)
+
+```
+CUTREE into 4 groups
+```{r}
+
+groups <- cutree(hClusters, k = 7)
+plot(groups)
+clusterQuality  = dunn( distance, groups, method = "euclidean")
+clusterQuality
+
+# Dunn's Index : 0.1570507, higher than Ward method's Dunn's Index with total 7 clusters - 1 overly-dense cluster, 2 sparse relatively clusters and 4 single record clusters - which is not a good clustering.
+
+# Hence Ward method clustering better.
+
+```
+[PART-2] Remove the non-numeric Column
+```{r}
+# Since grouping by school nameis not relevant removing it
+
+# Remove the school Column. That means, cluster based-on StadiumCapacity, Latitude, Logitude, AthleticRevenue, Endowment and enrollment columns.
+
+colNames = colnames(df)[c(-1, -5, -6)]
+df_num = subset.data.frame(x = df, select = colNames, drop = FALSE)
+colnames(df_num)
+
+```
+```{r}
+
+distance = dist(df_num, method="euclidean")
+
 ```
 
+K-means Clustering without normalization
 ```{r}
+# Aim is to organize the records into 10 clusters
+
+# Since, we know the target no of clusters needed, we use k-means clusterig
+
+library(fpc)
+
+kClusters = kmeans(df_num, 10)
+
+plotcluster(df_num, kClusters$cluster)
+
+ggplot(df_num, mapping = aes(x = kClusters$cluster)) +
+  geom_histogram() +
+  labs(title="No of Records in each cluster", x="Cluster") # + geom_text(aes(label = km$cluster), hjust = 1, vjust = -1) + geom_point()
+
+
+
+# aggregate(df_num, by=list(kClusters$cluster),FUN=mean)
+
+# clusterQuality  = dunn( distance, kClusters$cluster, method = "euclidean")
+
+# clusterQuality
+
+# dunn's index: 0.03813315
+
+```
+
+Normalize Data
+```{r}
+# Normalize the data
+df.norm <- data.frame(sapply(X = df_num, FUN = scale))
+head(df.norm)
+
+distance  = dist(df.norm, method = 'euclidean')
+  
+```
+
+K-means Clustering on normalized data
+```{r}
+# Aim is to organize the records into 10 clusters
+
+# Since, we know the target no of clusters needed, we use k-means clusterig
+
+kClusters = kmeans(df.norm, 10)
+
+plotcluster(df.norm, kClusters$cluster)
+
+aggregate(df_num, by=list(kClusters$cluster),FUN=mean)
+
+clusterQuality  = dunn( distance, kClusters$cluster, method = "euclidean")
+
+clusterQuality
+
+# dunn's index: 0.080144
+
 ```
 
 ```{r}
