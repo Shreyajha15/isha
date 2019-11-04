@@ -516,19 +516,21 @@ kClusters = kmeans(df_num, 10)
 
 plotcluster(df_num, kClusters$cluster)
 
+
 ggplot(df_num, mapping = aes(x = kClusters$cluster)) +
   geom_histogram() +
-  labs(title="No of Records in each cluster", x="Cluster") # + geom_text(aes(label = km$cluster), hjust = 1, vjust = -1) + geom_point()
+  labs(title="No of Records in each cluster", x="Cluster")
+
+clusterQuality  = dunn( distance, kClusters$cluster, method = "euclidean")
+
+clusterQuality
+
+#dunn's index: 0.03039224
 
 
-
-# aggregate(df_num, by=list(kClusters$cluster),FUN=mean)
-
-# clusterQuality  = dunn( distance, kClusters$cluster, method = "euclidean")
-
-# clusterQuality
-
-# dunn's index: 0.03813315
+# Cluster-7 is the largest
+# Cluster-3 is the smallest
+# The dispersion/ distance in the data made the least dense cluster diverse
 
 ```
 
@@ -552,20 +554,63 @@ kClusters = kmeans(df.norm, 10)
 
 plotcluster(df.norm, kClusters$cluster)
 
-aggregate(df_num, by=list(kClusters$cluster),FUN=mean)
+
+ggplot(df_num, mapping = aes(x = kClusters$cluster)) +
+  geom_histogram() +
+  labs(title="No of Records in each cluster", x="Cluster")
 
 clusterQuality  = dunn( distance, kClusters$cluster, method = "euclidean")
 
 clusterQuality
 
-# dunn's index: 0.080144
+# dunn's index: 0.1195883
+
+# Cluster-10 is the largest
+# Cluster-5 is the smallest
+
+# Comparing the clusters between non-normalized data and normalized data, we can see that the density of clusters is relatively distributed among more clusters in non-normalized data instead of concentrating in just few clusters in normalized data.
+# Dunn's Index is high incase of normalized data compared to non-normalized data
+
+
+```
+[PART-3] 
+
+```{r}
+
+data = read.csv('CookieMonsterStacked.CSV')
+
+browseList <- split(x = data$Website, f = data$ID)
+
+browseList[1:2]
 
 ```
 
 ```{r}
+library(arules)
+
+browseList <- lapply(browseList, unique)
+browseList <- as(browseList , "transactions")
+browseList[1:2]
 ```
 
 ```{r}
+
+itemFrequency(browseList)
+
+itemFrequencyPlot(browseList)
+
+browsingrules <- apriori(browseList, parameter = list(support = 0.035, confidence = 0.4))
+
+browsingrules_conf <- sort (browsingrules, by="confidence", decreasing=TRUE)
+
+browsingrules_conf <- sort (browsingrules, by="lift", decreasing=TRUE)
+
+inspect(browsingrules_conf)
+
+```
+
+```{r}
+
 ```
 
 ```{r}
