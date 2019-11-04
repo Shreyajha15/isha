@@ -599,7 +599,7 @@ itemFrequency(browseList)
 
 itemFrequencyPlot(browseList)
 
-browsingrules <- apriori(browseList, parameter = list(support = 0.035, confidence = 0.4))
+browsingrules <- apriori(browseList, parameter = list(support = 0.025, confidence = 0.8))
 
 browsingrules_conf <- sort (browsingrules, by="confidence", decreasing=TRUE)
 
@@ -607,10 +607,19 @@ browsingrules_conf <- sort (browsingrules, by="lift", decreasing=TRUE)
 
 inspect(browsingrules_conf)
 
+# Looking at the relative item frequency graph, we can know that average frequency of items is around 0.05
+
+# Using support 0.04 with apriori is not yielding any recommendations (just 2 rows)
+
+# Anything between 0.025 to 0.028 is yeielding results.
+
+# Confidence of 0.8 or more can be found among all the associations in the data. 
+
+# Hence support of 0.025 and confidence of 0.8 is recommended to generate meaningful associations
+
 ```
 
 ```{r}
-
 ```
 
 ```{r}
